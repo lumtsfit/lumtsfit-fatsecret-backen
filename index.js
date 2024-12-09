@@ -1,9 +1,13 @@
 const express = require("express");
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
+const cors = require("cors"); // Importa o pacote CORS
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configurar CORS para permitir acesso de qualquer origem
+app.use(cors());
 
 // Suas credenciais do FatSecret
 const OAUTH_CONSUMER_KEY = "d7942796961247c494f2150499854712";
@@ -51,7 +55,7 @@ app.get("/search", async (req, res) => {
     }
 });
 
-// Rota para a raiz (opcional, para evitar "Cannot GET /")
+// Rota para a raiz
 app.get("/", (req, res) => {
     res.send("Bem-vindo ao FatSecret Backend! Use a rota /search para buscar alimentos.");
 });
