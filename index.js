@@ -1,13 +1,13 @@
 const express = require("express");
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
-const cors = require("cors"); // Adicione isso no topo do arquivo
+const cors = require("cors"); // Middleware CORS para permitir requisições cross-origin
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configurar CORS para permitir acesso de qualquer origem
-app.use(cors()); // Adicione isso logo após a criação do app
+// Configurar CORS
+app.use(cors());
 
 // Suas credenciais do FatSecret
 const OAUTH_CONSUMER_KEY = "d7942796961247c494f2150499854712";
@@ -18,34 +18,27 @@ const BASE_URL = "https://platform.fatsecret.com/rest/server.api";
 function generateSignature(params) {
   const sortedParams = Object.keys(params)
     .sort()
-    .map(
-      (key) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-    )
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
     .join("&");
 
-  const baseString = `GET&${encodeURIComponent(
-    BASE_URL
-  )}&${encodeURIComponent(sortedParams)}`;
+  const baseString = `GET&${encodeURIComponent(BASE_URL)}&${encodeURIComponent(sortedParams)}`;
   const signingKey = `${OAUTH_CONSUMER_SECRET}&`;
-  return CryptoJS.HmacSHA1(baseString, signingKey).toString(
-    CryptoJS.enc.Base64
-  );
+  return CryptoJS.HmacSHA1(baseString, signingKey).toString(CryptoJS.enc.Base64);
 }
 
 // Rota para buscar alimentos
 app.get("/search", async (req, res) => {
   const { term } = req.query;
   if (!term) {
-    return res
-      .status(400)
-      .json({ error: "Termo de busca é obrigatório" });
+    return res.status(400).json({ error: "Termo de busca é obrigatório" });
   }
 
   const params = {
     method: "foods.search",
     search_expression: term,
     format: "json", // Força a API a retornar JSON
+    region: "BR", // Região configurada para Brasil
+    language: "pt", // Idioma configurado para Português
     oauth_consumer_key: OAUTH_CONSUMER_KEY,
     oauth_nonce: Math.random().toString(36).substring(2),
     oauth_signature_method: "HMAC-SHA1",
@@ -66,12 +59,10 @@ app.get("/search", async (req, res) => {
 
 // Rota para a raiz
 app.get("/", (req, res) => {
-  res.send(
-    "Bem-vindo ao FatSecret Backend! Use a rota /search para buscar alimentos."
-  );
+  res.send("Bem-vindo ao FatSecret Backend! Use a rota /search para buscar alimentos.");
 });
 
 // Inicializa o servidor
-app.listen(PORT, () =>
-  console.log(`Servidor rodando na porta ${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
