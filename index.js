@@ -5,10 +5,12 @@ const CryptoJS = require("crypto-js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const OAUTH_CONSUMER_KEY = "SEU_CONSUMER_KEY"; // Substitua pela sua chave do FatSecret
-const OAUTH_CONSUMER_SECRET = "SEU_CONSUMER_SECRET"; // Substitua pelo seu segredo do FatSecret
+// Suas credenciais do FatSecret
+const OAUTH_CONSUMER_KEY = "d7942796961247c494f2150499854712";
+const OAUTH_CONSUMER_SECRET = "bc73b0b71f6544fdb837eae3276c763c";
 const BASE_URL = "https://platform.fatsecret.com/rest/server.api";
 
+// Função para gerar assinatura OAuth
 function generateSignature(params) {
   const sortedParams = Object.keys(params)
     .sort()
@@ -20,6 +22,7 @@ function generateSignature(params) {
   return CryptoJS.HmacSHA1(baseString, signingKey).toString(CryptoJS.enc.Base64);
 }
 
+// Endpoint para buscar alimentos
 app.get("/search", async (req, res) => {
   const { term } = req.query;
   if (!term) {
@@ -47,4 +50,5 @@ app.get("/search", async (req, res) => {
   }
 });
 
+// Inicializa o servidor
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
